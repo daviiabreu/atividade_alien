@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercício do Alien</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <style> body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; } </style>
+</head>
+
+<body>
+    <script>
+        // aqui definimos as variaveis para altura e largura do jogo com o const (para não serem alteradas depois de definidas)
+        const larguraJogo = 700;
+        const alturaJogo = 850;
+
+        // aqui colocamos a altura e largura do jogo de acordo com as variáveis definidas
+        const config = {
+            type: Phaser.AUTO,
+            width: larguraJogo,
+            height: alturaJogo,
+
+        //ativando a física do jogo
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: 300 },
+                    debug: true 
+                }
+            },
+
+            scene: { //definindo as cenas de preload, create e update com os nomes de suas funções
+                preload: preload,
+                create: create,
+                update: update
+            }
+        };
+
+        // aqui criamos o jogo com as configurações definidas
+        const game = new Phaser.Game(config);
+
+        //aqui criamos as variáveis que serão usadas no jogo
+        var alien;
+        var teclado;
+        var turbo;  
+        var plataforma; 
+        var plataforma2;
+        var plataforma3;
+        var moeda;
+        var pontuacao = 0;
+        var placar
+
+        function preload() { //pre carregando as imagens que serão usadas no jogo
+            this.load.image('background', 'assets/bg.png');
+            this.load.image('alien', 'assets/alienigena.png');
+            this.load.image('turbo', 'assets/turbo.png');
+            this.load.image('plataforma', 'assets/tijolos.png');
+            this.load.image('moeda', 'assets/moeda.png')
+        }
+
+        function create() {
+            // aqui adicionamos a imagem de fundo no meio do jogo
+            this.add.image(larguraJogo/2, alturaJogo/2, 'background');
+
+            fogo = this.add.sprite(0, 0, 'turbo'); //adiciona o fogo que sai da nave do alien
+            fogo.setVisible(false);
+
+            alien = this.physics.add.sprite(larguraJogo/2, 0, 'alien'); // aqui adicionamos o alien no meio do jogo e definimos sua posição
+            alien.setCollideWorldBounds(true); // aqui definimos que o alien não pode sair da tela
+            //alien.body.setSize(20, 40, true); // aqui definimos o tamanho do corpo do alien
+
+            plataforma = this.physics.add.staticImage(larguraJogo/2, alturaJogo/2, 'plataforma'); // aqui adicionamos a plataforma no meio do jogo
+            this.physics.add.collider(alien, plataforma); // aqui definimos que o alien não pode passar pela plataforma
+
+            plataforma2 = this.physics.add.staticImage(100, 600, 'plataforma'); 
+            this.physics.add.collider(alien, plataforma2); 
+
+            plataforma3 = this.physics.add.staticImage(600, 250, 'plataforma'); 
+            this.physics.add.collider(alien, plataforma3); 
+
+            //aqui adicionamos a moeda
+            moeda = this.physics.add.sprite(larguraJogo/2, 0, 'moeda');
+            moeda.setCollideWorldBounds(true); //colocamos colisão na moeda
+            moeda.setBounce(0.7);  //aqui definimos que a moeda vai quicar
+            this.physics.add.collider(moeda, plataforma); // aqui definimos que a moeda não pode passar pela plataforma
+            this.physics.add.collider(moeda, plataforma2);
+            this.physics.add.collider(moeda, plataforma3);
+
+            //placar
+            placar = this.add.text(50, 50, 'Moedas:' + pontuacao, {fontSize:'45px', fill:'#495613'});
+
+            //aqui definimos que a moeda some quando o alien a toca
+            this.physics.add.overlap(alien, moeda, function(){
+                moeda.setVisible(false); //moeda "invisivel"
+                var posicaoMoeda_Y = Phaser.Math.RND.between(50, 650); //sorteia número
+                moeda.setPosition(posicaoMoeda_Y, 100); //posiciona a moeda
+                pontuacao += 1; //aumenta a pontuação
+                placar.setText('Moedas:' + pontuacao); //atualiza o placar
+                moeda.setVisible(true); //nova moeda "visivel"
+            });
+
+            teclado = this.input.keyboard.createCursorKeys(); // aqui definimos que o teclado será usado para controlar o alien
+
+            //adicionando movimentação com as teclas A, D, W e S
+            keybA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A); 
+            keybD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D); 
+            keybW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W); 
+            keybS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+        }
+
+        function update() {
+            if (teclado.left.isDown || keybA.isDown) {
+                alien.setVelocityX(-150); // aqui definimos que o alien vai para a esquerda
+            }
+
+            else if (teclado.right.isDown || keybD.isDown) {
+                alien.setVelocityX(150); // aqui definimos que o alien vai para a direita
+            } 
+
+            else {
+                alien.setVelocityX(0); // aqui definimos que o alien para de se mover
+            }
+
+            if (teclado.up.isDown || keybW.isDown) {
+                alien.setVelocityY(-150);  // aqui definimos que o alien vai para cima
+                ativarTurbo();
+            }
+
+            else {
+                semTurbo();
+            }
+
+            fogo.setPosition(alien.x, alien.y + alien.height/2); //adicionando a posição do fogo
+
+            function ativarTurbo() { //função para ativar o turbo
+                fogo.setVisible(true); 
+            }
+
+            function semTurbo() {
+                fogo.setVisible(false);
+            }
+
+        }
+    </script>
+</body>
+</html>
