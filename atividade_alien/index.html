@@ -10,6 +10,38 @@
 
 <body>
     <script>
+
+        // Definindo a classe Node que representa um nó na linked list
+        class Node {
+            constructor(data, next = null) {
+                this.data = data; // Dados armazenados no nó
+                this.next = next; // Referência para o próximo nó na linked list
+            }
+        }
+
+        // Definindo a classe LinkedList que representa a linked list
+        class LinkedList {
+            constructor() {
+            this.head = null; // O primeiro nó da linked list (inicialmente nulo, indicando uma lista vazia)
+            }
+
+        // Método para adicionar um novo nó ao final da linked list
+        append(data) {
+            const newNode = new Node(data); // Criando um novo nó com os dados fornecidos
+            if (!this.head) {
+                this.head = newNode; // Se a lista estiver vazia, o novo nó se torna o primeiro nó
+                return;
+            }
+
+            let current = this.head;
+            while (current.next) {
+                current = current.next; // Avançando até o último nó na lista
+            }
+
+            current.next = newNode; // Adicionando o novo nó ao final da lista
+        }
+        }
+
         // aqui definimos as variaveis para altura e largura do jogo com o const (para não serem alteradas depois de definidas)
         const larguraJogo = 700;
         const alturaJogo = 850;
@@ -39,6 +71,9 @@
         // aqui criamos o jogo com as configurações definidas
         const game = new Phaser.Game(config);
 
+        // Criando uma instância da linked list para armazenar as plataformas
+        const listaDePlataformas = new LinkedList();
+
         //aqui criamos as variáveis que serão usadas no jogo
         var alien;
         var teclado;
@@ -59,6 +94,12 @@
         }
 
         function create() {
+
+            // Adicionando as plataformas à linked list
+            listaDePlataformas.append(plataforma);
+            listaDePlataformas.append(plataforma2);
+            listaDePlataformas.append(plataforma3);
+
             // aqui adicionamos a imagem de fundo no meio do jogo
             this.add.image(larguraJogo/2, alturaJogo/2, 'background');
 
@@ -72,10 +113,10 @@
             plataforma = this.physics.add.staticImage(larguraJogo/2, alturaJogo/2, 'plataforma'); // aqui adicionamos a plataforma no meio do jogo
             this.physics.add.collider(alien, plataforma); // aqui definimos que o alien não pode passar pela plataforma
 
-            plataforma2 = this.physics.add.staticImage(100, 600, 'plataforma'); 
+            plataforma2 = this.physics.add.staticImage(100, 600, 'plataforma'); //o mesmo para a plataforma 2
             this.physics.add.collider(alien, plataforma2); 
 
-            plataforma3 = this.physics.add.staticImage(600, 250, 'plataforma'); 
+            plataforma3 = this.physics.add.staticImage(600, 250, 'plataforma');  //e para a plataforma 3
             this.physics.add.collider(alien, plataforma3); 
 
             //aqui adicionamos a moeda
